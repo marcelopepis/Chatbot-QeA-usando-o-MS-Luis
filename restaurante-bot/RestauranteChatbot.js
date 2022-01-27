@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { ActivityHandler, MessageFactory } = require('botbuilder');
+const { ActivityHandler, MessageFactory, TurnContext } = require('botbuilder');
 
 class RestauranteChatbot extends ActivityHandler {
     constructor() {
@@ -15,16 +15,27 @@ class RestauranteChatbot extends ActivityHandler {
         });
 
         this.onMembersAdded(async (context, next) => {
-            const membersAdded = context.activity.membersAdded;
-            const welcomeText = 'Hello and welcome!';
-            for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
-                if (membersAdded[cnt].id !== context.activity.recipient.id) {
-                    await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
-                }
-            }
+            await this.sendWelcomeMessage(context);
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
+    }
+
+    async sendWelcomeMessage(turnContext) {
+        const { activity } = turnContext;
+
+        for (const idx in activity.membersAdded) {
+            if (activity.membersAdded[idx].id !== activity.recipient.id) {
+                const welcomeMessage = `Bem vindo ao Chatbot de Reservas ${ activity.membersAdded[idx].name }.`;
+                await turnContext.sendActivity(welcomeMessage);
+                await this.sendSuggestedActions(turnContext);
+            }
+        }
+    }
+
+    async sendSuggestedActions(turnContext) {
+        var reply = MessageFactory.suggestedActions(['Fazer uma Reserva', 'Cancelar uma Reserva', 'Endereço do Restaurante'], 'O que você gostaria de fazer hoje?');
+        await turnContext.sendActivity(reply);
     }
 }
 
