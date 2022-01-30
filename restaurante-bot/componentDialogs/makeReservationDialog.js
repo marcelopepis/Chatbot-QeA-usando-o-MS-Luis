@@ -21,13 +21,13 @@ class MakeReservationDialog extends ComponentDialog {
         this.addDialog(new NumberPrompt(NUMBER_PROMPT, this.noOfParticipantsValidator));
         this.addDialog(new DateTimePrompt(DATETIME_PROMPT));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
-            this.firstStep.bind(this), // Ask confirmation if user wants to make reservation?
-            this.getName.bind(this), // Get name from user
-            this.getNumberOfParticipants.bind(this), // Number of participants for reservation
-            this.getDate.bind(this), // Date of reservation
-            this.getTime.bind(this), // Time of reservation
-            this.confirmStep.bind(this), // Show summary of values entered by user and ask confirmation to make reservation
-            this.summaryStep.bind(this)
+            this.firstStep.bind(this), // confirma se o usuário deseja fazer uma reserva.
+            this.getName.bind(this), // recebe o nome do usuário.
+            this.getNumberOfParticipants.bind(this), // Numero de participantes na reserva.
+            this.getDate.bind(this), // Dia da reserva.
+            this.getTime.bind(this), // Horário da reserva.
+            this.summaryStep.bind(this), // resumo dos dados da reserva.
+            this.confirmStep.bind(this)
 
         ]));
 
@@ -75,7 +75,7 @@ class MakeReservationDialog extends ComponentDialog {
         return await step.prompt(DATETIME_PROMPT, 'Qual o horario da reserva?');
     }
 
-    async confirmStep(step) {
+    async summaryStep(step) {
         step.values.time = step.result;
         var msg = `Então ficamos com a seguinte reserva: \n Name: ${ step.values.name } \n 
                    Participantes: ${ JSON.stringify(step.values.nOfParticipants) } \n 
@@ -85,7 +85,7 @@ class MakeReservationDialog extends ComponentDialog {
         return await step.prompt(CONFIRM_PROMPT, 'Você gostaria de confirmar essa reserva?', ['Sim', 'Não']);
     };
 
-    async summaryStep(step) {
+    async confirmStep(step) {
         if (step.result === true) {
             // salvar a reserva no banco
             await step.context.sendActivity('Reserva feita com sucesso! Id da sua reserva: ID123432');
