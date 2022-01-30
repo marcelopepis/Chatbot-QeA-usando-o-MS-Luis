@@ -53,6 +53,10 @@ class MakeReservationDialog extends ComponentDialog {
     async getName(step) {
         if (step.result === true) {
             return await step.prompt(TEXT_PROMPT, 'A reserva vai ser feita no nome de quem?');
+        } else if (step.result === false) {
+            await step.context.sendActivity('Nenhuma reserva foi feita.');
+            endDialog = true;
+            return await step.endDialog();
         }
     };
 
@@ -75,8 +79,8 @@ class MakeReservationDialog extends ComponentDialog {
         step.values.time = step.result;
         var msg = `Então ficamos com a seguinte reserva: \n Name: ${ step.values.name } \n 
                    Participantes: ${ JSON.stringify(step.values.nOfParticipants) } \n 
-                   Data: ${ JSON.stringify(step.values.date)[0]['values'] } \n
-                   Horário: ${ JSON.stringify(step.values.time)[0]['values'] }`;
+                   Data: ${ JSON.stringify(step.values.date) } \n
+                   Horário: ${ JSON.stringify(step.values.time) }`;
         await step.context.sendActivity(msg);
         return await step.prompt(CONFIRM_PROMPT, 'Você gostaria de confirmar essa reserva?', ['Sim', 'Não']);
     };
