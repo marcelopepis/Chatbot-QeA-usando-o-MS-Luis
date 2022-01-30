@@ -63,7 +63,7 @@ class MakeReservationDialog extends ComponentDialog {
 
     async getDate(step) {
         step.values.nOfParticipants = step.result;
-        return await step.promp(DATETIME_PROMPT, 'Informe a data da reserva');
+        return await step.prompt(DATETIME_PROMPT, 'Informe a data da reserva');
     }
 
     async getTime(step) {
@@ -75,10 +75,10 @@ class MakeReservationDialog extends ComponentDialog {
         step.values.time = step.result;
         var msg = `Então ficamos com a seguinte reserva: \n Name: ${ step.values.name } \n 
                    Participantes: ${ JSON.stringify(step.values.nOfParticipants) } \n 
-                   Data: ${ JSON.stringify(step.values.date) } \n
-                   Horário: ${ JSON.stringify(step.values.time) }`;
+                   Data: ${ JSON.stringify(step.values.date)[0]['values'] } \n
+                   Horário: ${ JSON.stringify(step.values.time)[0]['values'] }`;
         await step.context.sendActivity(msg);
-        return await step.promp(CONFIRM_PROMPT, 'Você gostaria de confirmar essa reserva?', ['Sim', 'Não']);
+        return await step.prompt(CONFIRM_PROMPT, 'Você gostaria de confirmar essa reserva?', ['Sim', 'Não']);
     };
 
     async summaryStep(step) {
