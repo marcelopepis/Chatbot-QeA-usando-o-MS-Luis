@@ -66,6 +66,9 @@ class RestauranteChatbot extends ActivityHandler {
             await this.conversationData.set(context, { endDialog: false });
             await this.makeReservationDialog.run(context, this.dialogState);
             conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
+            if (conversationData.endDialog === true) {
+                await this.sendSuggestedActions(context);
+            }
             break;
         default:
             console.log('error');
