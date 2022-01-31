@@ -1,0 +1,64 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+      {
+          "speak": "Json Restaurante tem uma nota 9/10 de seus clientes.",
+          "type": "ColumnSet",
+          "columns": [
+              {
+                  "type": "Column",
+                  "width": 2,
+                  "items": [
+                      {
+                          "type": "TextBlock",
+                          "text": "Redmond, WA",
+                          "wrap": true
+                      },
+                      {
+                          "type": "TextBlock",
+                          "text": "Json Restaurante",
+                          "weight": "Bolder",
+                          "size": "ExtraLarge",
+                          "spacing": "None",
+                          "wrap": true
+                      },
+                      {
+                          "type": "TextBlock",
+                          "text": "4.5 stars (176 reviews) · mid-priced",
+                          "isSubtle": true,
+                          "spacing": "None",
+                          "wrap": true
+                      },
+                      {
+                          "type": "TextBlock",
+                          "text": "**Marcelo Pepis** disse \"Grande variedade de pratos, ótimo menu de vinhos!\"",
+                          "size": "Small",
+                          "wrap": true,
+                          "maxLines": 3
+                      }
+                  ]
+              },
+              {
+                  "type": "Column",
+                  "width": 1,
+                  "items": [
+                      {
+                          "type": "Image",
+                          "url": "https://s3-media1.fl.yelpcdn.com/bphoto/HD_NsxwaCTwKRxvOZs2Shw/ls.jpg",
+                          "altText": "imagens de cervejas em uma mesa."
+                      }
+                  ]
+              }
+          ]
+      }
+  ],
+  "actions": [
+      {
+          "type": "Action.OpenUrl",
+          "title": "More Info",
+          "url": "https://www.yelp.com/biz/malt-and-vine-redmond"
+      }
+  ]
+}

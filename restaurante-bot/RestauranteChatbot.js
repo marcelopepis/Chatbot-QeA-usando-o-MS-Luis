@@ -3,6 +3,7 @@
 
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { MakeReservationDialog } = require('./componentDialogs/makeReservationDialog');
+const { CancelReservationDialog } = require('./componentDialogs/cancelReservationDialog');
 
 class RestauranteChatbot extends ActivityHandler {
     constructor(conversationState, userState) {
@@ -12,6 +13,7 @@ class RestauranteChatbot extends ActivityHandler {
         this.userState = userState;
         this.dialogState = conversationState.createProperty('dialogState');
         this.makeReservationDialog = new MakeReservationDialog(this.conversationState, this.userState);
+        this.cancelReservationDialog = new CancelReservationDialog(this.conversationState, this.userState);
         this.previousIntent = this.conversationState.createProperty('previousIntent');
         this.conversationData = this.conversationState.createProperty('conversationData');
         this.onMessage(async (context, next) => {
@@ -66,6 +68,14 @@ class RestauranteChatbot extends ActivityHandler {
             await this.conversationData.set(context, { endDialog: false });
             await this.makeReservationDialog.run(context, this.dialogState);
             conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
+            if (conversationData.endDialog === true) {
+                await this.sendSuggestedActions(context);
+            }
+            break;
+        case 'Cancelar uma Reserva':
+            await this.conversationData.set(context, { endDialog: false });
+            await this.cancelReservationDialog.run(context, this.dialogState);
+            conversationData.endDialog = await this.cancelReservationDialog.isDialogComplete();
             if (conversationData.endDialog === true) {
                 await this.sendSuggestedActions(context);
             }
