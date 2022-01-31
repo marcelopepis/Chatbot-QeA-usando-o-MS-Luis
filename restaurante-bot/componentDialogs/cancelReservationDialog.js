@@ -25,9 +25,9 @@ class CancelReservationDialog extends ComponentDialog {
         this.addDialog(new NumberPrompt(NUMBER_PROMPT));
         this.addDialog(new DateTimePrompt(DATETIME_PROMPT));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
-            this.firstStep.bind(this), // confirma se o usuário deseja fazer uma reserva.
-            this.summaryStep.bind(this), // resumo dos dados da reserva.
-            this.confirmStep.bind(this)
+            this.firstStep.bind(this), // Pede ao usuário o número da reserva que ele deseja cancelar.
+            this.summaryStep.bind(this), // Informa ao usuário o número da reserva que ele forneceu.
+            this.confirmStep.bind(this) // Confirma o cancelamento.
 
         ]));
 
@@ -51,22 +51,20 @@ class CancelReservationDialog extends ComponentDialog {
             text: 'Informe a id da reserva para cancelamento.',
             attachments: [CardFactory.adaptiveCard(CARDS[0])]
         });
+        return await step.prompt(TEXT_PROMPT, '');
     };
 
     async summaryStep(step) {
-        step.values.time = step.result;
-        var msg = `Então ficamos com a seguinte reserva: \n Name: ${ step.values.name } \n 
-                   Participantes: ${ JSON.stringify(step.values.nOfParticipants) } \n 
-                   Data: ${ JSON.stringify(step.values.date) } \n
-                   Horário: ${ JSON.stringify(step.values.time) }`;
+        step.values.reservationId = step.result;
+        var msg = `Este é o número da sua reserva: \n No: ${ step.values.reservationId }}`;
         await step.context.sendActivity(msg);
-        return await step.prompt(CONFIRM_PROMPT, 'Você gostaria de confirmar essa reserva?', ['Sim', 'Não']);
+        return await step.prompt(CONFIRM_PROMPT, 'Tem certeza que deseja cancelar essa reserva?', ['Sim', 'Não']);
     };
 
     async confirmStep(step) {
         if (step.result === true) {
             // salvar a reserva no banco
-            await step.context.sendActivity('Reserva feita com sucesso! Id da sua reserva: ID123432');
+            await step.context.sendActivity('Ok, sua reserva foi cancelada com sucesso.');
             endDialog = true;
             return await step.endDialog();
         }
