@@ -1,7 +1,7 @@
 {
   "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
   "type": "AdaptiveCard",
-  "version": "1.5",
+  "version": "1.3",
   "body": [
       {
           "speak": "Json Restaurante tem uma nota 9/10 de seus clientes.",
@@ -33,7 +33,7 @@
                       },
                       {
                           "type": "TextBlock",
-                          "text": "**Marcelo Pepis** disse \"Grande variedade de pratos, ótimo menu de vinhos!\"",
+                          "text": "**Marcelo Pepis** said \"Grande variedade de pratos, ótimo menu de vinhos!\"",
                           "size": "Small",
                           "wrap": true,
                           "maxLines": 3
@@ -47,7 +47,7 @@
                       {
                           "type": "Image",
                           "url": "https://s3-media1.fl.yelpcdn.com/bphoto/HD_NsxwaCTwKRxvOZs2Shw/ls.jpg",
-                          "altText": "imagens de cervejas em uma mesa."
+                          "altText": "image of beer growlers on a table"
                       }
                   ]
               }

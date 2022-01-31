@@ -77,6 +77,7 @@ class RestauranteChatbot extends ActivityHandler {
             await this.cancelReservationDialog.run(context, this.dialogState);
             conversationData.endDialog = await this.cancelReservationDialog.isDialogComplete();
             if (conversationData.endDialog === true) {
+                await this.previousIntent.set(context, { intentName: null });
                 await this.sendSuggestedActions(context);
             }
             break;

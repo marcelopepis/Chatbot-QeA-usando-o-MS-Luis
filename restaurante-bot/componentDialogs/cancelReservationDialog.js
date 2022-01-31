@@ -56,7 +56,7 @@ class CancelReservationDialog extends ComponentDialog {
 
     async summaryStep(step) {
         step.values.reservationId = step.result;
-        var msg = `Este é o número da sua reserva: \n No: ${ step.values.reservationId }}`;
+        var msg = `Este é o número da sua reserva: \n ${ step.values.reservationId }`;
         await step.context.sendActivity(msg);
         return await step.prompt(CONFIRM_PROMPT, 'Tem certeza que deseja cancelar essa reserva?', ['Sim', 'Não']);
     };
