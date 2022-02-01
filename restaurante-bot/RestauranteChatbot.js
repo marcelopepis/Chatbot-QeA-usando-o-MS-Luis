@@ -4,6 +4,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { MakeReservationDialog } = require('./componentDialogs/makeReservationDialog');
 const { CancelReservationDialog } = require('./componentDialogs/cancelReservationDialog');
+const { LuisRecognizer } = require('botbuilder-ai');
 
 class RestauranteChatbot extends ActivityHandler {
     constructor(conversationState, userState) {
@@ -16,7 +17,21 @@ class RestauranteChatbot extends ActivityHandler {
         this.cancelReservationDialog = new CancelReservationDialog(this.conversationState, this.userState);
         this.previousIntent = this.conversationState.createProperty('previousIntent');
         this.conversationData = this.conversationState.createProperty('conversationData');
+
+        this.dispatchRecognizer = new LuisRecognizer({
+            applicationId: process.env.LuisAppId,
+            endpointKey: process.env.LuisAPIKey,
+            endpoint: `https://${ process.env.LuisAPIHostName }.api.cognitive.microsoft.com`
+        },
+        {
+            includeAllIntents: true
+        }, true);
+
         this.onMessage(async (context, next) => {
+            const luisResult = await this.dispatchRecognizer.recognize(context);
+            console.log(luisResult);
+            const intent = LuisRecognizer.topIntent(luisResult);
+            console.log(intent);
             await this.dispatchToIntentAsync(context);
             await next();
         });
@@ -64,7 +79,7 @@ class RestauranteChatbot extends ActivityHandler {
             await this.previousIntent.set(context, { intentName: context.activity.text });
         }
         switch (currentIntent) {
-        case 'Fazer uma Reserva':
+        case 'Make Reservation':
             await this.conversationData.set(context, { endDialog: false });
             await this.makeReservationDialog.run(context, this.dialogState);
             conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
