@@ -34,18 +34,26 @@ class MakeReservationDialog extends ComponentDialog {
         this.initialDialogId = WATERFALL_DIALOG;
     }
 
-    async run(turnContext, accessor) {
+    async run(turnContext, accessor, entities) {
         const dialogSet = new DialogSet(accessor);
         dialogSet.add(this);
 
         const dialogContext = await dialogSet.createContext(turnContext);
         const results = await dialogContext.continueDialog();
         if (results.status === DialogTurnStatus.empty) {
-            await dialogContext.beginDialog(this.id);
+            await dialogContext.beginDialog(this.id, entities);
         }
     }
 
     async firstStep(step) {
+        try {
+            step.values.noOfParticipants = step._info.options.numberOfParticipants[0];
+            step.values.time = step._info.options.timeReserve[0];
+            console.log(step.values.noOfParticipants);
+            console.log(step.values.time);
+        } catch (error) {
+            console.log('usuário não informou dados.');
+        }
         endDialog = false;
         return await step.prompt(CONFIRM_PROMPT, 'Você gostaria de fazer uma reserva?', ['Sim', 'Não']);
     };
@@ -62,23 +70,35 @@ class MakeReservationDialog extends ComponentDialog {
 
     async getNumberOfParticipants(step) {
         step.values.name = step.result;
-        return await step.prompt(NUMBER_PROMPT, 'Mesa para quantas pessoas (1-20)?');
+        if (!step.values.noOfParticipants) {
+            return await step.prompt(NUMBER_PROMPT, 'Mesa para quantas pessoas (1-20)?');
+        } else {
+            return await step.continueDialog();
+        }
     };
 
     async getDate(step) {
-        step.values.nOfParticipants = step.result;
+        if (!step.values.noOfParticipants) {
+            step.values.noOfParticipants = step.result;
+        }
         return await step.prompt(DATETIME_PROMPT, 'Informe a data da reserva');
     }
 
     async getTime(step) {
         step.values.date = step.result;
-        return await step.prompt(DATETIME_PROMPT, 'Qual o horario da reserva?');
+        if (!step.values.time) {
+            return await step.prompt(DATETIME_PROMPT, 'Qual o horario da reserva?');
+        } else {
+            return await step.continueDialog();
+        }
     }
 
     async summaryStep(step) {
-        step.values.time = step.result;
+        if (!step.values.time) {
+            step.values.time = step.result;
+        }
         var msg = `Então ficamos com a seguinte reserva: \n Name: ${ step.values.name } \n 
-                   Participantes: ${ JSON.stringify(step.values.nOfParticipants) } \n 
+                   Participantes: ${ JSON.stringify(step.values.noOfParticipants) } \n 
                    Data: ${ JSON.stringify(step.values.date) } \n
                    Horário: ${ JSON.stringify(step.values.time) }`;
         await step.context.sendActivity(msg);

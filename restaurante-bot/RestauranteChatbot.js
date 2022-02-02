@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { ActivityHandler, MessageFactory } = require('botbuilder');
+const { ActivityHandler, MessageFactory, CardFactory } = require('botbuilder');
 const { MakeReservationDialog } = require('./componentDialogs/makeReservationDialog');
 const { CancelReservationDialog } = require('./componentDialogs/cancelReservationDialog');
 const { LuisRecognizer } = require('botbuilder-ai');
+const RestaurantCard = require('./resources/adaptativeCards/RestaurantCard.json');
 
 class RestauranteChatbot extends ActivityHandler {
     constructor(conversationState, userState) {
@@ -29,10 +30,9 @@ class RestauranteChatbot extends ActivityHandler {
 
         this.onMessage(async (context, next) => {
             const luisResult = await this.dispatchRecognizer.recognize(context);
-            console.log(luisResult);
             const intent = LuisRecognizer.topIntent(luisResult);
-            console.log(intent);
-            await this.dispatchToIntentAsync(context);
+            const entities = luisResult.entities;
+            await this.dispatchToIntentAsync(context, intent, entities);
             await next();
         });
 
@@ -55,7 +55,10 @@ class RestauranteChatbot extends ActivityHandler {
         for (const idx in activity.membersAdded) {
             if (activity.membersAdded[idx].id !== activity.recipient.id) {
                 const welcomeMessage = `Bem vindo ao Chatbot de Reservas ${ activity.membersAdded[idx].name }.`;
-                await turnContext.sendActivity(welcomeMessage);
+                await turnContext.sendActivity({
+                    text: welcomeMessage,
+                    attachments: [CardFactory.adaptiveCard(RestaurantCard)]
+                });
                 await this.sendSuggestedActions(turnContext);
             }
         }
@@ -66,29 +69,29 @@ class RestauranteChatbot extends ActivityHandler {
         await turnContext.sendActivity(reply);
     }
 
-    async dispatchToIntentAsync(context) {
+    async dispatchToIntentAsync(context, intent, entities) {
         var currentIntent = '';
         const previousIntent = await this.previousIntent.get(context, {});
         const conversationData = await this.conversationData.get(context, {});
         if (previousIntent.intentName && conversationData.endDialog === false) {
             currentIntent = previousIntent.intentName;
         } else if (previousIntent.intentName && conversationData.endDialog === true) {
-            currentIntent = context.activity.text;
+            currentIntent = intent;
         } else {
-            currentIntent = context.activity.text;
-            await this.previousIntent.set(context, { intentName: context.activity.text });
+            currentIntent = intent;
+            await this.previousIntent.set(context, { intentName: intent });
         }
         switch (currentIntent) {
-        case 'Make Reservation':
+        case 'Make_Reservation':
             await this.conversationData.set(context, { endDialog: false });
-            await this.makeReservationDialog.run(context, this.dialogState);
+            await this.makeReservationDialog.run(context, this.dialogState, entities);
             conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
             if (conversationData.endDialog === true) {
                 await this.previousIntent.set(context, { intentName: null });
                 await this.sendSuggestedActions(context);
             }
             break;
-        case 'Cancelar uma Reserva':
+        case 'Cancel_Reservation':
             await this.conversationData.set(context, { endDialog: false });
             await this.cancelReservationDialog.run(context, this.dialogState);
             conversationData.endDialog = await this.cancelReservationDialog.isDialogComplete();
