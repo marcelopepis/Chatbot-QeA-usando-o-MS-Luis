@@ -4,7 +4,7 @@
 const { ActivityHandler, MessageFactory, CardFactory } = require('botbuilder');
 const { MakeReservationDialog } = require('./componentDialogs/makeReservationDialog');
 const { CancelReservationDialog } = require('./componentDialogs/cancelReservationDialog');
-const { LuisRecognizer } = require('botbuilder-ai');
+const { LuisRecognizer, QnAMaker } = require('botbuilder-ai');
 const RestaurantCard = require('./resources/adaptativeCards/RestaurantCard.json');
 
 class RestauranteChatbot extends ActivityHandler {
@@ -28,9 +28,17 @@ class RestauranteChatbot extends ActivityHandler {
             includeAllIntents: true
         }, true);
 
+        const qnaMaker = new QnAMaker({
+            knowledgeBaseId: process.env.QnAKnowledgeBaseId,
+            endpointKey: process.env.QnAEndPointKey,
+            host: process.env.QnAEndpointHostName
+        });
+
+        this.qnaMaker = qnaMaker;
+
         this.onMessage(async (context, next) => {
             const luisResult = await this.dispatchRecognizer.recognize(context);
-            const intent = LuisRecognizer.topIntent(luisResult);
+            const intent = LuisRecognizer.topIntent(luisResult, 0.9);
             const entities = luisResult.entities;
             await this.dispatchToIntentAsync(context, intent, entities);
             await next();
@@ -65,7 +73,7 @@ class RestauranteChatbot extends ActivityHandler {
     }
 
     async sendSuggestedActions(turnContext) {
-        var reply = MessageFactory.suggestedActions(['Fazer uma Reserva', 'Cancelar uma Reserva', 'Endereço do Restaurante'], 'O que você gostaria de fazer hoje?');
+        var reply = MessageFactory.suggestedActions(['Fazer uma Reserva', 'Cancelar uma Reserva', 'Endereço'], 'O que você gostaria de fazer hoje?');
         await turnContext.sendActivity(reply);
     }
 
@@ -77,6 +85,15 @@ class RestauranteChatbot extends ActivityHandler {
             currentIntent = previousIntent.intentName;
         } else if (previousIntent.intentName && conversationData.endDialog === true) {
             currentIntent = intent;
+        } else if (intent === 'None' && !previousIntent.intentName) {
+            try {
+                var result = await this.qnaMaker.getAnswers(context);
+                console.log(result);
+                await context.sendActivity(`${ result[0].answer }`);
+                await this.sendSuggestedActions(context);
+            } catch (error) {
+                await this.sendSuggestedActions(context);
+            };
         } else {
             currentIntent = intent;
             await this.previousIntent.set(context, { intentName: intent });
