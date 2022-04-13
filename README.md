@@ -1,5 +1,5 @@
 # Chatbot-QeA-usando-o-MS-Luis
-Chatbot criado com em .net  para testes com modelos de QeA do Luis.
+Chatbot criado com em .net  para testes com modelos de QeA do Luis.<br>
 Foi criado um dialogo simples, para fazer uma reserva de mesa em um restaurante.
 Para isso foi utilizado o serviço cognitivo do MS Luis reconhecendo intents e elementos importante do texto
 como horário, quantidade de pessoas, etc.
